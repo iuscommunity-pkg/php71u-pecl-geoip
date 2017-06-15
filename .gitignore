@@ -1,3 +1,6 @@
-geoip-1.0.8.tgz
-/geoip-1.1.0.tgz
-/geoip-1.1.1.tgz
+BUILD
+BUILDROOT
+MOCK
+RPMS
+SOURCES/*.tgz
+SRPMS
