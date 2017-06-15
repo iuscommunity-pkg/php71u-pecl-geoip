@@ -1,34 +1,44 @@
-%global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
-%{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
-%{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
-
-%define pecl_name geoip
-%if "%{php_version}" < "5.6"
-%global ini_name  %{pecl_name}.ini
-%else
+%global pecl_name geoip
 %global ini_name  40-%{pecl_name}.ini
-%endif
+%global php       php71u
 
-Name:		php-pecl-geoip
-Version:	1.1.1
-Release:	2%{?dist}
-Summary:	Extension to map IP addresses to geographic places
-Group:		Development/Languages
-License:	PHP
-URL:		http://pecl.php.net/package/%{pecl_name}
-Source0:	http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
+Name:           %{php}-pecl-%{pecl_name}
+Version:        1.1.1
+Release:        1.ius%{?dist}
+Summary:        Extension to map IP addresses to geographic places
+License:        PHP
+URL:            http://pecl.php.net/package/%{pecl_name}
+Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
-BuildRequires:	GeoIP-devel
-BuildRequires:	php-devel
-BuildRequires:	php-pear
+BuildRequires:  GeoIP-devel
+BuildRequires:  %{php}-devel
+BuildRequires:  pecl >= 1.10.0
 
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
 
-Provides:       php-%{pecl_name}               = %{version}
-Provides:       php-%{pecl_name}%{?_isa}       = %{version}
-Provides:       php-pecl(%{pecl_name})         = %{version}
+# provide the stock name
+Provides:       php-pecl-%{pecl_name} = %{version}
+Provides:       php-pecl-%{pecl_name}%{?_isa} = %{version}
+
+# provide the stock and IUS names without pecl
+Provides:       php-%{pecl_name} = %{version}
+Provides:       php-%{pecl_name}%{?_isa} = %{version}
+Provides:       %{php}-%{pecl_name} = %{version}
+Provides:       %{php}-%{pecl_name}%{?_isa} = %{version}
+
+# provide the stock and IUS names in pecl() format
+Provides:       php-pecl(%{pecl_name}) = %{version}
 Provides:       php-pecl(%{pecl_name})%{?_isa} = %{version}
+Provides:       %{php}-pecl(%{pecl_name}) = %{version}
+Provides:       %{php}-pecl(%{pecl_name})%{?_isa} = %{version}
+
+# conflict with the stock name
+Conflicts:      php-pecl-%{pecl_name} < %{version}
+
+%{?filter_provides_in: %filter_provides_in %{php_extdir}/.*\.so$}
+%{?filter_provides_in: %filter_provides_in %{php_ztsextdir}/.*\.so$}
+%{?filter_setup}
 
 
 %description
@@ -68,13 +78,11 @@ make %{?_smp_mflags}
 
 
 %install
-make -C %{pecl_name}-%{version} install INSTALL_ROOT=%{buildroot} INSTALL="install -p"
+make -C %{pecl_name}-%{version} install INSTALL_ROOT=%{buildroot}
+install -D -p -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 # Install XML package description
-install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
-
-# install config file
-install -Dpm644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
+install -D -p -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
 # Documentation
 cd %{pecl_name}-%{version}
@@ -106,12 +114,15 @@ NO_INTERACTION=1 \
 %files
 %license %{pecl_name}-%{version}/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
-%config(noreplace) %{_sysconfdir}/php.d/%{ini_name}
+%config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
 %{pecl_xmldir}/%{name}.xml
 
 
 %changelog
+* Thu Jun 15 2017 Carl George <carl.george@rackspace.com> - 1.1.1-1.ius
+- Port from Fedora to IUS
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.1.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
