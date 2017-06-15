@@ -82,7 +82,7 @@ make -C %{pecl_name}-%{version} install INSTALL_ROOT=%{buildroot}
 install -D -p -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 # Install XML package description
-install -D -p -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
+install -D -p -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
 
 # Documentation
 cd %{pecl_name}-%{version}
@@ -114,14 +114,16 @@ NO_INTERACTION=1 \
 %files
 %license %{pecl_name}-%{version}/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
+%{pecl_xmldir}/%{pecl_name}.xml
+
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
-%{pecl_xmldir}/%{name}.xml
 
 
 %changelog
 * Thu Jun 15 2017 Carl George <carl.george@rackspace.com> - 1.1.1-1.ius
 - Port from Fedora to IUS
+- Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
 
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.1.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
