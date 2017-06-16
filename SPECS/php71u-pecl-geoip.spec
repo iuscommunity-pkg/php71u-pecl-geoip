@@ -182,7 +182,7 @@ fi
 * Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> - 1.1.1-1
 - update to 1.1.1
 
-* Mon Jul 27 2016 Remi Collet <remi@fedoraproject.org> - 1.1.0-1
+* Wed Jul 27 2016 Remi Collet <remi@fedoraproject.org> - 1.1.0-1
 - update to 1.1.0 (beta)
 - https://fedoraproject.org/wiki/Changes/php70
 - cleanup spec
