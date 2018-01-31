@@ -6,7 +6,7 @@
 
 Name:           %{php}-pecl-%{pecl_name}
 Version:        1.1.1
-Release:        1.ius%{?dist}
+Release:        2.ius%{?dist}
 Summary:        Extension to map IP addresses to geographic places
 License:        PHP
 URL:            http://pecl.php.net/package/%{pecl_name}
@@ -14,13 +14,16 @@ Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
 BuildRequires:  GeoIP-devel
 BuildRequires:  %{php}-devel
-BuildRequires:  pecl >= 1.10.0
+
+BuildRequires:  pear1u
+# explicitly require pear dependencies to avoid conflicts
+BuildRequires:  %{php}-cli
+BuildRequires:  %{php}-common
+BuildRequires:  %{php}-process
+BuildRequires:  %{php}-xml
 
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
-
-Requires(post): pecl >= 1.10.0
-Requires(postun): pecl >= 1.10.0
 
 # provide the stock name
 Provides:       php-pecl-%{pecl_name} = %{version}
@@ -142,12 +145,20 @@ NO_INTERACTION=1 \
 popd
 
 
-%post
-%{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+%triggerin -- pear1u
+if [ -x %{__pecl} ]; then
+    %{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+fi
+
+
+%posttrans
+if [ -x %{__pecl} ]; then
+    %{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+fi
 
 
 %postun
-if [ $1 -eq 0 ]; then
+if [ $1 -eq 0 -a -x %{__pecl} ]; then
     %{pecl_uninstall} %{pecl_name} >/dev/null || :
 fi
 
@@ -167,6 +178,9 @@ fi
 
 
 %changelog
+* Wed Jan 31 2018 Carl George <carl@george.computer> - 1.1.1-2.ius
+- Remove pear requirement and update scriptlets (adapted from remirepo)
+
 * Thu Jun 15 2017 Carl George <carl.george@rackspace.com> - 1.1.1-1.ius
 - Port from Fedora to IUS
 - Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
