@@ -61,22 +61,19 @@ sed -e 's/role="test"/role="src"/' \
     -e '/LICENSE/s/role="doc"/role="src"/' \
     -i package.xml
 
-cat > %{ini_name} << 'EOF'
+cat > %{ini_name} << EOF
 ; Enable %{pecl_name} extension module
 extension=%{pecl_name}.so
 EOF
 
 mv %{pecl_name}-%{version} NTS
 
-pushd NTS
-
 # Upstream often forget this
-extver=$(sed -n '/#define PHP_GEOIP_VERSION/{s/.* "//;s/".*$//;p}' php_geoip.h)
+extver=$(sed -n '/#define PHP_GEOIP_VERSION/{s/.* "//;s/".*$//;p}' NTS/php_geoip.h)
 if test "x${extver}" != "x%{version}"; then
    : Error: Upstream version is ${extver}, expecting %{version}.
    exit 1
 fi
-popd
 
 %if %{with zts}
 cp -pr NTS ZTS
@@ -87,14 +84,14 @@ cp -pr NTS ZTS
 pushd NTS
 phpize
 %configure --with-php-config=%{_bindir}/php-config
-make %{?_smp_mflags}
+%make_build
 popd
 
 %if %{with zts}
 pushd ZTS
 zts-phpize
 %configure --with-php-config=%{_bindir}/zts-php-config
-make %{?_smp_mflags}
+%make_build
 popd
 %endif
 
